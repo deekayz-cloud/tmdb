@@ -439,16 +439,12 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
 
         # Wrap overview
         wrapped_overview = "\n".join(textwrap.wrap(overview, width=65))
-        lines = wrapped_overview.split("\n")
+        # Actual rendered height of the wrapped summary (must measure, not estimate:
+        # a single-glyph bbox ignores line spacing and undercounts multi-line height)
+        overview_bbox = draw.multiline_textbbox(overview_position, wrapped_overview, font=font_overview)
+        summary_height = overview_bbox[3] - overview_bbox[1]
 
-        # Compute height of one line using getbbox
-        bbox = font_overview.getbbox("A")  # (left, top, right, bottom)
-        line_height = bbox[3] - bbox[1]
-
-        # Total height of wrapped summary
-        summary_height = line_height * len(lines)
-
-        custom_position =  (210, overview_position[1] + summary_height + 100)
+        custom_position = (210, overview_position[1] + summary_height + 60)
 
 
         # Overview

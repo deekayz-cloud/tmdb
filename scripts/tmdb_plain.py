@@ -357,11 +357,12 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
 
         # Wrap overview text
         wrapped_overview = "\n".join(textwrap.wrap(overview, width=70))
-        overview_lines = wrapped_overview.split("\n")
-        bbox = font_overview.getbbox("Ag")
-        line_height = bbox[3] - bbox[1]
-        summary_height = line_height * len(overview_lines)
-        custom_position = (210, overview_position[1] + summary_height + 100)
+
+        # Actual rendered height of the wrapped summary (must measure, not estimate:
+        # a single-glyph bbox ignores line spacing and undercounts multi-line height)
+        overview_bbox = draw.multiline_textbbox(overview_position, wrapped_overview, font=font_overview)
+        summary_height = overview_bbox[3] - overview_bbox[1]
+        custom_position = (210, overview_position[1] + summary_height + 60)
 
         # Draw Overview for info
         draw.text((overview_position[0] + shadow_offset, overview_position[1] + shadow_offset), wrapped_overview, font=font_overview, fill=shadow_color)
