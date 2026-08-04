@@ -342,7 +342,7 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         # Text font
         font_title = ImageFont.truetype(truetype_path, size=190)
         font_overview = ImageFont.truetype(truetype_path, size=50)
-        font_custom = ImageFont.truetype(truetype_path, size=60)
+        font_custom = ImageFont.truetype(truetype_path, size=50)
 
         # Text color
         shadow_color = "black"
@@ -453,7 +453,7 @@ for movie in trending_movies.get('results', []):
 
     # Check if backdrop image is available
     backdrop_path = movie['backdrop_path']
-    custom_text = "Now Trending on"
+    custom_text = "Jetzt im Trend"
     if backdrop_path:
         # Construct image URL
         image_url = f"https://image.tmdb.org/t/p/original{backdrop_path}"
@@ -484,7 +484,7 @@ for tvshow in trending_tvshows.get('results', []):
 
     # Check if backdrop image is available
     backdrop_path = tvshow['backdrop_path']
-    custom_text = "Now Trending on"
+    custom_text = "Jetzt im Trend"
     if backdrop_path:
         # Construct image URL
         image_url = f"https://image.tmdb.org/t/p/original{backdrop_path}"

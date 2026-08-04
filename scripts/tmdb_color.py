@@ -425,12 +425,12 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         # Fonts
         font_title = ImageFont.truetype(truetype_path, size=190)
         font_overview = ImageFont.truetype(truetype_path, size=50)
-        font_custom = ImageFont.truetype(truetype_path, size=60)
+        font_custom = ImageFont.truetype(truetype_path, size=50)
 
         shadow_color = "black"
         main_color = "white"
         overview_color = "white"
-        metadata_color = "white"
+        metadata_color = (150, 150, 150)  # Grey color, matches PHP nachbau
 
         title_position = (200, 420)
         overview_position = (210, 730)
@@ -470,7 +470,7 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
 
         draw.text((info_position[0] + shadow_offset, info_position[1] + shadow_offset),
                   info_text, font=font_overview, fill=shadow_color)
-        draw.text(info_position, info_text, font=font_overview, fill=overview_color)
+        draw.text(info_position, info_text, font=font_overview, fill=metadata_color)
 
         # Logo (same as your old code)
         if is_movie:
@@ -501,7 +501,7 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         # Custom text
         draw.text((custom_position[0] + shadow_offset, custom_position[1] + shadow_offset),
                   custom_text, font=font_custom, fill=shadow_color)
-        draw.text(custom_position, custom_text, font=font_custom, fill=metadata_color)
+        draw.text(custom_position, custom_text, font=font_custom, fill=overview_color)
 
         bckg.paste(tmdblogo, (680, custom_position[1] + 20), tmdblogo)
 
@@ -544,7 +544,7 @@ for movie in trending_movies.get('results', []):
 
     # Check if backdrop image is available
     backdrop_path = movie['backdrop_path']
-    custom_text = "Now Trending on"
+    custom_text = "Jetzt im Trend"
     if backdrop_path:
         # Construct image URL
         image_url = f"https://image.tmdb.org/t/p/original{backdrop_path}"
@@ -575,7 +575,7 @@ for tvshow in trending_tvshows.get('results', []):
 
     # Check if backdrop image is available
     backdrop_path = tvshow['backdrop_path']
-    custom_text = "Now Trending on"
+    custom_text = "Jetzt im Trend"
     if backdrop_path:
         # Construct image URL
         image_url = f"https://image.tmdb.org/t/p/original{backdrop_path}"
