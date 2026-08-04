@@ -1,0 +1,5 @@
+.env
+docs/
+scripts/Roboto-Light.ttf
+__pycache__/
+*.pyc
