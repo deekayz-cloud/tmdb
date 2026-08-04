@@ -432,13 +432,13 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         overview_color = "white"
         metadata_color = (150, 150, 150)  # Grey color, matches PHP nachbau
 
-        title_position = (200, 320)
-        overview_position = (210, 630)
+        title_position = (200, 300)
+        overview_position = (210, 610)
         shadow_offset = 2
-        info_position = (210, 550)
+        info_position = (210, 530)
 
         # Wrap overview
-        wrapped_overview = "\n".join(textwrap.wrap(overview, width=65))
+        wrapped_overview = "\n".join(textwrap.wrap(overview, width=65, max_lines=8, placeholder=" ..."))
         # Actual rendered height of the wrapped summary (must measure, not estimate:
         # a single-glyph bbox ignores line spacing and undercounts multi-line height)
         overview_bbox = draw.multiline_textbbox(overview_position, wrapped_overview, font=font_overview)

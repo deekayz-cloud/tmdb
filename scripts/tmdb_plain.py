@@ -350,13 +350,13 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         metadata_color = "white"
 
         # Text position
-        title_position = (200, 320)
-        overview_position = (210, 630)
+        title_position = (200, 300)
+        overview_position = (210, 610)
         shadow_offset = 2
-        info_position = (210, 550)  # Adjusted position for logo and info
+        info_position = (210, 530)  # Adjusted position for logo and info
 
         # Wrap overview text
-        wrapped_overview = "\n".join(textwrap.wrap(overview, width=70))
+        wrapped_overview = "\n".join(textwrap.wrap(overview, width=70, max_lines=8, placeholder=" ..."))
 
         # Actual rendered height of the wrapped summary (must measure, not estimate:
         # a single-glyph bbox ignores line spacing and undercounts multi-line height)
