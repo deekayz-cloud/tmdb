@@ -199,6 +199,7 @@ trending_tvshows_url = f'{TMDB_BASE_URL}/trending/tv/week?language={LANGUAGE}'
 initial_fetch_count = numberofmovies + 10  # Fetch 15 to get at least 5 valid ones
 trending_movies_url = f'{TMDB_BASE_URL}/trending/movie/week?language={LANGUAGE}'
 trending_movies_response = requests.get(trending_movies_url, headers=headers)
+print(f"DEBUG trending_movies status={trending_movies_response.status_code} body={trending_movies_response.text[:300]}")
 all_movies = trending_movies_response.json().get('results', [])[:initial_fetch_count]
 
 # Filter manually
