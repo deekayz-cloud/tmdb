@@ -432,13 +432,13 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         overview_color = "white"
         metadata_color = (150, 150, 150)  # Grey color, matches PHP nachbau
 
-        title_position = (200, 420)
-        overview_position = (210, 730)
+        title_position = (200, 320)
+        overview_position = (210, 630)
         shadow_offset = 2
-        info_position = (210, 650)
+        info_position = (210, 550)
 
         # Wrap overview
-        wrapped_overview = "\n".join(textwrap.wrap(overview, width=65, max_lines=3, placeholder=" ..."))
+        wrapped_overview = "\n".join(textwrap.wrap(overview, width=65))
         lines = wrapped_overview.split("\n")
 
         # Compute height of one line using getbbox
@@ -503,7 +503,9 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
                   custom_text, font=font_custom, fill=shadow_color)
         draw.text(custom_position, custom_text, font=font_custom, fill=overview_color)
 
-        bckg.paste(tmdblogo, (680, custom_position[1] + 20), tmdblogo)
+        custom_text_width = font_custom.getlength(custom_text)
+        logo_x = int(custom_position[0] + custom_text_width + 20)
+        bckg.paste(tmdblogo, (logo_x, custom_position[1] + 20), tmdblogo)
 
         # Save
         filename = os.path.join(category_dir, f"{clean_filename(title)}.jpg")
@@ -544,7 +546,7 @@ for movie in trending_movies.get('results', []):
 
     # Check if backdrop image is available
     backdrop_path = movie['backdrop_path']
-    custom_text = "Jetzt im Trend"
+    custom_text = "Jetzt im Trend auf"
     if backdrop_path:
         # Construct image URL
         image_url = f"https://image.tmdb.org/t/p/original{backdrop_path}"
@@ -575,7 +577,7 @@ for tvshow in trending_tvshows.get('results', []):
 
     # Check if backdrop image is available
     backdrop_path = tvshow['backdrop_path']
-    custom_text = "Jetzt im Trend"
+    custom_text = "Jetzt im Trend auf"
     if backdrop_path:
         # Construct image URL
         image_url = f"https://image.tmdb.org/t/p/original{backdrop_path}"

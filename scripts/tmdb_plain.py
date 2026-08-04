@@ -334,7 +334,6 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         # Paste images
         bckg.paste(image, (1175, 0))
         bckg.paste(overlay, (1175, 0), overlay)
-        bckg.paste(tmdblogo, (680, 890), tmdblogo)
 
         # Add title text with shadow
         draw = ImageDraw.Draw(bckg)
@@ -351,14 +350,18 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         metadata_color = "white"
 
         # Text position
-        title_position = (200, 420)
-        overview_position = (210, 730)
+        title_position = (200, 320)
+        overview_position = (210, 630)
         shadow_offset = 2
-        info_position = (210, 650)  # Adjusted position for logo and info
-        custom_position = (210, 870)
+        info_position = (210, 550)  # Adjusted position for logo and info
 
         # Wrap overview text
-        wrapped_overview = "\n".join(textwrap.wrap(overview, width=70, max_lines=2, placeholder=" ..."))
+        wrapped_overview = "\n".join(textwrap.wrap(overview, width=70))
+        overview_lines = wrapped_overview.split("\n")
+        bbox = font_overview.getbbox("Ag")
+        line_height = bbox[3] - bbox[1]
+        summary_height = line_height * len(overview_lines)
+        custom_position = (210, overview_position[1] + summary_height + 100)
 
         # Draw Overview for info
         draw.text((overview_position[0] + shadow_offset, overview_position[1] + shadow_offset), wrapped_overview, font=font_overview, fill=shadow_color)
@@ -414,6 +417,10 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         draw.text((custom_position[0] + shadow_offset, custom_position[1] + shadow_offset), custom_text, font=font_custom, fill=shadow_color)
         draw.text(custom_position, custom_text, font=font_custom, fill=metadata_color)
 
+        custom_text_width = font_custom.getlength(custom_text)
+        logo_x = int(custom_position[0] + custom_text_width + 20)
+        bckg.paste(tmdblogo, (logo_x, custom_position[1] + 20), tmdblogo)
+
         # Save the resized image
         filename = os.path.join(category_dir, f"{clean_filename(title)}.jpg")
         bckg = bckg.convert('RGB')
@@ -453,7 +460,7 @@ for movie in trending_movies.get('results', []):
 
     # Check if backdrop image is available
     backdrop_path = movie['backdrop_path']
-    custom_text = "Jetzt im Trend"
+    custom_text = "Jetzt im Trend auf"
     if backdrop_path:
         # Construct image URL
         image_url = f"https://image.tmdb.org/t/p/original{backdrop_path}"
@@ -484,7 +491,7 @@ for tvshow in trending_tvshows.get('results', []):
 
     # Check if backdrop image is available
     backdrop_path = tvshow['backdrop_path']
-    custom_text = "Jetzt im Trend"
+    custom_text = "Jetzt im Trend auf"
     if backdrop_path:
         # Construct image URL
         image_url = f"https://image.tmdb.org/t/p/original{backdrop_path}"
