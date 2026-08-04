@@ -11,6 +11,7 @@ import json
 load_dotenv(verbose=True)
 
 TMDB_BEARER_TOKEN = os.getenv('TMDB_BEARER_TOKEN')
+print(f"DEBUG token length={len(TMDB_BEARER_TOKEN or '')} starts_with_bearer={(TMDB_BEARER_TOKEN or '').lower().startswith('bearer')} has_whitespace={(TMDB_BEARER_TOKEN or '') != (TMDB_BEARER_TOKEN or '').strip()}")
 TMDB_BASE_URL = os.getenv('TMDB_BASE_URL')
 LANGUAGE = os.getenv("TMDB_LANGUAGE")
 
