@@ -12,7 +12,10 @@ Dient dem visuellen Vergleich mit dem eigenständigen PHP-Nachbau in `projectivy
 
 GitHub Actions (`.github/workflows/generate.yml`) läuft alle 6h:
 1. `scripts/tmdb_plain.py` und `scripts/tmdb_color.py` rendern Bilder + schreiben JSON nach `docs/`
-2. `docs/` wird per GitHub Pages veröffentlicht (Actions-Deploy, kein Commit ins Git-History)
+2. `scripts/combine_overflight.py` fasst die Color-Varianten (Movies+TV) zu einer einzigen
+   Overflight-tauglichen Datei zusammen (Feld `url_img` statt `url_1080p`, dedupliziert) —
+   Overflight akzeptiert pro Quelle nur eine URL, analog zum `all_color.php` im PHP-Nachbau
+3. `docs/` wird per GitHub Pages veröffentlicht (Actions-Deploy, kein Commit ins Git-History)
 
 ## Setup
 
@@ -23,12 +26,16 @@ GitHub Actions (`.github/workflows/generate.yml`) läuft alle 6h:
 2. Repo → Settings → Pages → Source: "GitHub Actions" (einmalig, siehe unten)
 3. Workflow manuell anstoßen zum Testen: `gh workflow run generate.yml`
 
-## Overflight-URLs (nach erstem erfolgreichen Run)
+## Overflight-URL (einzige URL fürs Plugin)
 
-- `https://deekayz-cloud.github.io/tmdb/tmdb_movies.json`
-- `https://deekayz-cloud.github.io/tmdb/tmdb_tv.json`
-- `https://deekayz-cloud.github.io/tmdb/tmdb_movies_color.json`
-- `https://deekayz-cloud.github.io/tmdb/tmdb_tv_color.json`
+```
+https://deekayz-cloud.github.io/tmdb/tmdb_all.json
+```
+
+Enthält Movies+TV (Color-Variante) kombiniert, Feld `url_img`. Die 4 Einzel-JSONs
+(`tmdb_movies.json`, `tmdb_tv.json`, `tmdb_movies_color.json`, `tmdb_tv_color.json`)
+bleiben zusätzlich unter `docs/` erreichbar, sind aber nicht Overflight-kompatibel
+(Feldname `url_1080p`, nicht kombiniert).
 
 ## Lokal testen
 
@@ -37,4 +44,5 @@ pip install -r requirements.txt
 cp .env.example .env   # TMDB_BEARER_TOKEN eintragen
 python scripts/tmdb_plain.py
 python scripts/tmdb_color.py
+python scripts/combine_overflight.py
 ```

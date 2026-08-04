@@ -35,6 +35,7 @@ jobs:
 
       - run: python scripts/tmdb_plain.py
       - run: python scripts/tmdb_color.py
+      - run: python scripts/combine_overflight.py
 
       - uses: actions/upload-pages-artifact@v3
         with:
