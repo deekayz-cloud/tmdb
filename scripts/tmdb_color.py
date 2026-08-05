@@ -444,7 +444,7 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         overview_bbox = draw.multiline_textbbox(overview_position, wrapped_overview, font=font_overview)
         summary_height = overview_bbox[3] - overview_bbox[1]
 
-        custom_position = (210, overview_position[1] + summary_height + 100)
+        custom_position = (210, overview_position[1] + summary_height + 80)
 
 
         # Overview
