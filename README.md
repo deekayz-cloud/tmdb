@@ -16,7 +16,8 @@ GitHub Actions (`.github/workflows/generate.yml`) läuft alle 6h:
    Overflight-tauglichen Dateien zusammen (Feld `url_img` statt `url_1080p`, dedupliziert,
    Reihenfolge zufällig gemischt) — Overflight akzeptiert pro Quelle nur eine URL,
    analog zum `all_color.php` im PHP-Nachbau
-3. `docs/` wird per GitHub Pages veröffentlicht (Actions-Deploy, kein Commit ins Git-History)
+3. `site/index.html` wird nach `docs/index.html` kopiert (Übersichtsseite mit allen JSON-Links + FireTV-Simulation)
+4. `docs/` wird per GitHub Pages veröffentlicht (Actions-Deploy, kein Commit ins Git-History)
 
 ## Setup
 

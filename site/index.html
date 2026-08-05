@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>TMDB Backdrops – Live Vorschau</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 24px 64px;
+    background: #0b0b0f; color: #e8e8ec;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  p.sub { color: #9a9aa5; margin: 0 0 28px; font-size: 0.9rem; }
+  h2 { font-size: 1.05rem; margin: 40px 0 12px; color: #cfcfd8; }
+
+  ul.links { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; max-width: 640px; }
+  ul.links li a {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 10px 14px; border-radius: 8px;
+    background: #16161d; color: #8ec7ff; text-decoration: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem;
+    border: 1px solid #23232d;
+  }
+  ul.links li a:hover { border-color: #3a6fd8; }
+  ul.links li a span.tag {
+    color: #6b6b76; font-family: inherit;
+  }
+
+  .tv-wrap { max-width: 960px; }
+  .tv-controls { display: flex; gap: 8px; margin-bottom: 14px; }
+  .tv-controls button {
+    padding: 8px 16px; border-radius: 6px; border: 1px solid #2c2c38;
+    background: #16161d; color: #cfcfd8; font-size: 0.85rem; cursor: pointer;
+  }
+  .tv-controls button.active { background: #2a5adf; border-color: #2a5adf; color: #fff; }
+
+  .tv-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 0 0 6px #1c1c24, 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .tv-frame img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    opacity: 0; transition: opacity 1.2s ease;
+  }
+  .tv-frame img.visible { opacity: 1; }
+  .tv-caption {
+    margin-top: 10px; font-size: 0.8rem; color: #7a7a85;
+  }
+  .empty { color: #6b6b76; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+  <h1>TMDB Backdrops für Projectivy / Overflight</h1>
+  <p class="sub">Automatisch generiert alle 6h · <span id="genTime"></span></p>
+
+  <h2>JSON-Endpunkte</h2>
+  <ul class="links" id="linkList"></ul>
+
+  <h2>FireTV-Vorschau</h2>
+  <div class="tv-wrap">
+    <div class="tv-controls">
+      <button id="btnColor" class="active">Color</button>
+      <button id="btnPlain">Plain</button>
+    </div>
+    <div class="tv-frame" id="tvFrame"></div>
+    <div class="tv-caption" id="tvCaption">Lädt…</div>
+  </div>
+
+<script>
+const BASE = "."; // same origin, relative to docs/
+const SOURCES = [
+  ["tmdb_movies.json", "Movies (plain, url_1080p)"],
+  ["tmdb_tv.json", "TV (plain, url_1080p)"],
+  ["tmdb_movies_color.json", "Movies (color, url_1080p)"],
+  ["tmdb_tv_color.json", "TV (color, url_1080p)"],
+  ["tmdb_all_plain.json", "Alle Plain, kombiniert (Overflight url_img)"],
+  ["tmdb_all.json", "Alle Color, kombiniert (Overflight url_img)"],
+];
+
+const linkList = document.getElementById("linkList");
+for (const [file, label] of SOURCES) {
+  const li = document.createElement("li");
+  const a = document.createElement("a");
+  a.href = file;
+  a.target = "_blank";
+  a.innerHTML = `${file} <span class="tag">${label}</span>`;
+  li.appendChild(a);
+  linkList.appendChild(li);
+}
+document.getElementById("genTime").textContent = new Date().toLocaleString("de-DE");
+
+// --- FireTV simulation: cycle through backdrops like Overflight would ---
+const frame = document.getElementById("tvFrame");
+const caption = document.getElementById("tvCaption");
+const btnColor = document.getElementById("btnColor");
+const btnPlain = document.getElementById("btnPlain");
+
+let items = [];
+let index = 0;
+let timer = null;
+
+function imgFor(item) {
+  const img = document.createElement("img");
+  img.src = item.url_img;
+  img.alt = item.title || "";
+  return img;
+}
+
+function showNext() {
+  if (!items.length) return;
+  const item = items[index % items.length];
+  index++;
+
+  const next = imgFor(item);
+  frame.appendChild(next);
+  requestAnimationFrame(() => next.classList.add("visible"));
+
+  caption.textContent = `${item.title || "?"} · ${item.location || ""}`;
+
+  const old = [...frame.children].filter(el => el !== next);
+  setTimeout(() => old.forEach(el => el.remove()), 1300);
+}
+
+async function loadVariant(file) {
+  clearInterval(timer);
+  caption.textContent = "Lädt…";
+  try {
+    const res = await fetch(file, { cache: "no-store" });
+    items = await res.json();
+  } catch (e) {
+    items = [];
+  }
+  index = 0;
+  frame.innerHTML = "";
+  if (!items.length) {
+    caption.textContent = "Keine Bilder gefunden.";
+    return;
+  }
+  showNext();
+  timer = setInterval(showNext, 6000);
+}
+
+btnColor.addEventListener("click", () => {
+  btnColor.classList.add("active");
+  btnPlain.classList.remove("active");
+  loadVariant("tmdb_all.json");
+});
+btnPlain.addEventListener("click", () => {
+  btnPlain.classList.add("active");
+  btnColor.classList.remove("active");
+  loadVariant("tmdb_all_plain.json");
+});
+
+loadVariant("tmdb_all.json");
+</script>
+</body>
+</html>
