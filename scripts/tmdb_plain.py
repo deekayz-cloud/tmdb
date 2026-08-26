@@ -129,7 +129,10 @@ def should_exclude_movie(movie, movie_excluded_countries=movie_excluded_countrie
     # Check if the movie's country is in the excluded countries list
 	origin_countries = [c.lower() for c in movie.get('origin_country', [])]
 	genres = [movie_genres.get(genre_id, '') for genre_id in movie.get('genre_ids', [])]
-	
+
+	if 'Horror' in genres:
+		return True
+
 	# Fetch movie keywords
 	movie_keywords = get_movie_keywords(movie['id']) if excluded_keywords else []
 	
@@ -159,6 +162,9 @@ def should_exclude_tvshow(tvshow, tv_excluded_countries=tv_excluded_countries, t
     # Ensure 'origin_country' is a list or string and get the country (case insensitive)
     origin_countries = [c.lower() for c in tvshow.get('origin_country', [])]
     genres = [tv_genres.get(genre_id, '') for genre_id in tvshow.get('genre_ids', [])]
+
+    if 'Horror' in genres:
+        return True
 
     for country in origin_countries:
         if country in tv_excluded_countries:
