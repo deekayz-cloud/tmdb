@@ -285,6 +285,52 @@ def resize_logo(image, width, height):
     return resized_img
 
 
+# --- Logo layout ---------------------------------------------------------
+# Logos come in very different shapes (wide banners vs. tall stacked titles).
+# Fitting them into a fixed box and anchoring them above the metadata made tall
+# logos touch the top edge and left a big gap above wide ones. Instead:
+#  1. crop transparent padding so the visible logo is measured,
+#  2. scale every logo to roughly the same visual area (wide logos get wider,
+#     tall ones get shorter), capped by max width/height,
+#  3. anchor the logo at a fixed top margin and let the text block follow it.
+LOGO_TOP = 170            # distance from top edge to logo (px, 2160p canvas)
+LOGO_MAX_W = 1100
+LOGO_MAX_H = 380
+LOGO_TARGET_AREA = 340_000
+LOGO_GAP = 25             # logo -> metadata line
+INFO_TO_OVERVIEW = 80     # metadata line -> overview
+DEFAULT_INFO_Y = 530      # used when no logo is available (text title)
+
+
+def fit_logo(image):
+    image = image.convert("RGBA")
+    bbox = image.getchannel("A").getbbox()
+    if bbox:
+        image = image.crop(bbox)
+    aspect = image.width / image.height
+    w = (LOGO_TARGET_AREA * aspect) ** 0.5
+    h = w / aspect
+    if w > LOGO_MAX_W:
+        w, h = LOGO_MAX_W, LOGO_MAX_W / aspect
+    if h > LOGO_MAX_H:
+        w, h = LOGO_MAX_H * aspect, LOGO_MAX_H
+    return image.resize((max(1, round(w)), max(1, round(h))), Image.LANCZOS)
+
+
+def load_logo(is_movie, media_id, title):
+    logo_path = get_logo("movie" if is_movie else "tv", media_id, language="en")
+    if not logo_path:
+        return None
+    try:
+        r = requests.get(f"https://image.tmdb.org/t/p/original{logo_path}", timeout=10)
+        if r.status_code != 200:
+            return None
+        return fit_logo(Image.open(BytesIO(r.content)))
+    except Exception as e:
+        print(f"Failed to load logo for {title}: {e}")
+        return None
+
+
 
 
 
@@ -439,9 +485,15 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
         metadata_color = (150, 150, 150)  # Grey color, matches PHP nachbau
 
         title_position = (200, 300)
-        overview_position = (210, 610)
         shadow_offset = 2
-        info_position = (210, 530)
+        # Logo first: its height decides where the text block starts
+        logo_image = load_logo(is_movie, movie['id'] if is_movie else tvshow['id'], title)
+        if logo_image is not None:
+            info_y = LOGO_TOP + logo_image.height + LOGO_GAP
+        else:
+            info_y = DEFAULT_INFO_Y
+        info_position = (210, info_y)
+        overview_position = (210, info_y + INFO_TO_OVERVIEW)
 
         # Wrap overview
         wrapped_overview = "\n".join(textwrap.wrap(overview, width=65, max_lines=8, placeholder=" ..."))
@@ -474,26 +526,10 @@ def process_image(image_url, title, is_movie, genre, year, rating, duration=None
                   info_text, font=font_overview, fill=shadow_color)
         draw.text(info_position, info_text, font=font_overview, fill=metadata_color)
 
-        # Logo (same as your old code)
-        if is_movie:
-            logo_path = get_logo("movie", movie['id'], language="en")
-        else:
-            logo_path = get_logo("tv", tvshow['id'], language="en")
-
         logo_drawn = False
-        if logo_path:
-            logo_url = f"https://image.tmdb.org/t/p/original{logo_path}"
-            logo_response = requests.get(logo_url)
-            if logo_response.status_code == 200:
-                try:
-                    logo_image = Image.open(BytesIO(logo_response.content))
-                    logo_image = resize_logo(logo_image, 1000, 500)
-                    logo_position = (210, info_position[1] - logo_image.height - 25)
-                    logo_image = logo_image.convert('RGBA')
-                    bckg.paste(logo_image, logo_position, logo_image)
-                    logo_drawn = True
-                except Exception as e:
-                    print(f"Failed to draw logo for {title}: {e}")
+        if logo_image is not None:
+            bckg.paste(logo_image, (210, LOGO_TOP), logo_image)
+            logo_drawn = True
 
         if not logo_drawn:
             draw.text((title_position[0] + shadow_offset, title_position[1] + shadow_offset),
